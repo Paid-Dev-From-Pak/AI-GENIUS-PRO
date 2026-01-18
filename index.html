@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI GENIUS PRO - Academic Workstation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://js.puter.com/v2/"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://unpkg.com/tesseract.js@v4.0.1/dist/tesseract.min.js"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid #1e293b; }
+    </style>
+</head>
+<body class="min-h-screen bg-[#020617] text-slate-200 p-4 transition-colors duration-300">
+
+    <div class="max-w-6xl mx-auto space-y-6 pt-6">
+        <div class="flex justify-between items-center bg-slate-900/50 p-4 rounded-3xl border border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="bg-cyan-500 p-2 rounded-xl"><i data-lucide="cpu" class="text-white"></i></div>
+                <h1 class="text-2xl font-black tracking-tighter">AI GENIUS <span class="text-cyan-400">PRO</span></h1>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="toggleTheme()" class="p-2 hover:bg-slate-800 rounded-full transition"><i data-lucide="sun"></i></button>
+                <button onclick="window.location.reload()" class="p-2 hover:bg-slate-800 rounded-full transition"><i data-lucide="refresh-cw"></i></button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-5 space-y-6">
+                <div class="glass-card rounded-[2rem] p-6 shadow-2xl">
+                    <div class="relative border-2 border-dashed border-slate-800 rounded-2xl p-8 text-center hover:bg-slate-800/30 transition group mb-4">
+                        <input type="file" id="scanner-input" class="absolute inset-0 opacity-0 cursor-pointer" accept=".pdf,image/*">
+                        <div id="scan-status">
+                            <i data-lucide="camera" class="mx-auto w-10 h-10 text-slate-600 mb-2 group-hover:text-cyan-400"></i>
+                            <p class="text-sm font-bold text-slate-400">Scan PDF or Image</p>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <textarea id="ai-input" class="w-full h-48 bg-slate-950/50 border border-slate-800 rounded-xl p-5 outline-none focus:border-cyan-500/50 text-slate-300 placeholder:text-slate-700 custom-scrollbar" placeholder="Paste question or let AI scan your file..."></textarea>
+                        <button onclick="startDictation()" class="absolute bottom-4 right-4 p-2 bg-slate-800 rounded-lg hover:text-cyan-400 transition" title="Voice Input">
+                            <i data-lucide="mic"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        <button onclick="askAI('solve')" id="solve-btn" class="bg-gradient-to-r from-cyan-600 to-blue-600 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-cyan-900/20 flex items-center justify-center gap-2">
+                            <i data-lucide="brain-circuit" class="w-4 h-4"></i> Get Solution
+                        </button>
+                        <button onclick="askAI('plan')" class="bg-slate-800 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-700 flex items-center justify-center gap-2">
+                            <i data-lucide="calendar" class="w-4 h-4"></i> Study Plan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 space-y-6">
+                <div id="result-area" class="hidden glass-card rounded-[2.5rem] p-8 space-y-4 border border-slate-800">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                            <span id="result-type" class="text-cyan-400 text-xs font-black uppercase tracking-widest">AI Solution</span>
+                        </div>
+                    </div>
+                    <div id="result-text" class="text-slate-300 leading-relaxed whitespace-pre-wrap text-sm max-h-[500px] overflow-y-auto custom-scrollbar pr-4"></div>
+                    
+                    <div class="flex items-center gap-4 bg-slate-950 p-3 rounded-2xl">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Translate:</span>
+                        <div class="flex gap-2">
+                            <button onclick="translateResult('Spanish')" class="text-[10px] px-2 py-1 bg-slate-800 rounded hover:bg-cyan-900 transition">ES</button>
+                            <button onclick="translateResult('French')" class="text-[10px] px-2 py-1 bg-slate-800 rounded hover:bg-cyan-900 transition">FR</button>
+                            <button onclick="translateResult('Hindi')" class="text-[10px] px-2 py-1 bg-slate-800 rounded hover:bg-cyan-900 transition">HI</button>
+                            <button onclick="translateResult('Arabic')" class="text-[10px] px-2 py-1 bg-slate-800 rounded hover:bg-cyan-900 transition">AR</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="empty-state" class="h-full flex flex-col items-center justify-center text-center p-12 border border-dashed border-slate-800 rounded-[2.5rem]">
+                    <i data-lucide="sparkles" class="w-12 h-12 text-slate-800 mb-4"></i>
+                    <h2 class="text-xl font-bold text-slate-600">Ready for your assignment</h2>
+                    <p class="text-sm text-slate-700">Upload a file or type a question to begin</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+        // Voice Dictation
+        function startDictation() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.start();
+            document.getElementById('ai-input').placeholder = "Listening...";
+            recognition.onresult = (e) => {
+                document.getElementById('ai-input').value = e.results[0][0].transcript;
+                document.getElementById('ai-input').placeholder = "Enter question or let AI scan your file...";
+            };
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            document.body.classList.toggle('bg-white');
+            document.body.classList.toggle('text-slate-900');
+        }
+
+        // AI Core Logic
+        async function askAI(mode) {
+            const prompt = document.getElementById('ai-input').value;
+            const resText = document.getElementById('result-text');
+            const resArea = document.getElementById('result-area');
+            const emptyState = document.getElementById('empty-state');
+            const typeLabel = document.getElementById('result-type');
+
+            if(!prompt) return alert("Enter content first!");
+            
+            resArea.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            resText.innerText = "Processing with AI Genius...";
+
+            let systemPrompt = "Solve this assignment accurately: ";
+            if(mode === 'plan') {
+                systemPrompt = "Create a detailed step-by-step study schedule to complete this task in 3 days: ";
+                typeLabel.innerText = "Personal Study Plan";
+            } else {
+                typeLabel.innerText = "Verified AI Solution";
+            }
+
+            try {
+                const response = await puter.ai.chat(systemPrompt + prompt);
+                resText.innerText = response;
+            } catch (err) {
+                resText.innerText = "Error: Check connection.";
+            }
+        }
+
+        // Translation
+        async function translateResult(lang) {
+            const currentText = document.getElementById('result-text').innerText;
+            if(!currentText || currentText === "Processing with AI Genius...") return;
+            
+            document.getElementById('result-text').innerText = `Translating to ${lang}...`;
+            try {
+                const response = await puter.ai.chat(`Translate this accurately to ${lang}: ${currentText}`);
+                document.getElementById('result-text').innerText = response;
+            } catch (err) {
+                document.getElementById('result-text').innerText = "Translation error.";
+            }
+        }
+
+        // Scanner Logic
+        document.getElementById('scanner-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            const status = document.getElementById('scan-status');
+            if(!file) return;
+            
+            status.innerHTML = "<p class='text-xs font-bold animate-pulse text-cyan-400'>Processing...</p>";
+            
+            try {
+                if(file.type === "application/pdf") {
+                    const reader = new FileReader();
+                    reader.onload = async function() {
+                        const typedarray = new Uint8Array(this.result);
+                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                        const page = await pdf.getPage(1);
+                        const content = await page.getTextContent();
+                        document.getElementById('ai-input').value = content.items.map(s => s.str).join(" ");
+                        status.innerHTML = "<p class='text-xs font-bold text-green-500'>Scan Complete ✅</p>";
+                    };
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    const result = await Tesseract.recognize(file, 'eng');
+                    document.getElementById('ai-input').value = result.data.text;
+                    status.innerHTML = "<p class='text-xs font-bold text-green-500'>Scan Complete ✅</p>";
+                }
+            } catch (err) {
+                status.innerHTML = "<p class='text-xs font-bold text-red-500'>Scan Failed</p>";
+            }
+        });
+    </script>
+</body>
+</html>
